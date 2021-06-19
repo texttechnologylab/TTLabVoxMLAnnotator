@@ -1,0 +1,7 @@
+pyvistaqt
+torch
+PyQt5
+dgl
+trimesh
+pyvista
+tk-html-widgets
