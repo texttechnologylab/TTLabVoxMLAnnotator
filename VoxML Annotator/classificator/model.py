@@ -1,18 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-@Author: Yue Wang
-@Contact: yuewangx@mit.edu
-@File: model.py
-@Time: 2018/10/13 6:35 PM
+https://github.com/WangYueFt/dgcnn/blob/master/pytorch/model.py
+https://arxiv.org/abs/1801.07829
 """
 
-
-import os
-import sys
-import copy
-import math
-import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F

@@ -1,7 +1,6 @@
 import random
 import torch
 import trimesh
-import os
 import math
 
 
