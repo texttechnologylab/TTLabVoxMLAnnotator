@@ -1,17 +1,23 @@
+import threading
 import xml.etree.ElementTree as ET
 from tkinter import filedialog, constants
+import torch
 import framer
 import re
+from classificator.surface_sampling import createpointcloudforfile
+import pyvista as pv
+from pyvistaqt import BackgroundPlotter
 
 
-def loadVoxMLFile():
+def loadVoxMLFile(voxfile=None):
     """
     Load VoxMl.xml Files
     """
-    partdir = filedialog.askopenfilename(filetypes=[("VoxML files", ".xml")])
+    if voxfile is None:
+        voxfile = filedialog.askopenfilename(filetypes=[("VoxML files", ".xml .txt")])
     voxentity = None
-    if partdir.endswith(".xml"):
-        VoxML = ET.parse(partdir)
+    if voxfile.endswith(".xml") or voxfile.endswith(".txt"):
+        VoxML = ET.parse(voxfile)
         entity = VoxML.find("Entity")
         if entity is not None:
             voxentity = entity.get("Type")
@@ -182,9 +188,70 @@ def loadVoxMLFile():
             framer.Objframe.tkraise()
 
 
-def load3dobj():
-    """
-    Load 3D Objekt, classify und use preannotated document
-    TODO!
-    """
-    pass
+classdict = {
+    0: "airplane",
+    1: "bathtub",
+    2: "bed",
+    3: "bench",
+    4: "bookshelf",
+    5: "bottle",
+    6: "bowl",
+    7: "car",
+    8: "chair",
+    9: "cone",
+    10: "cup",
+    11: "curtain",
+    12: "desk",
+    13: "door",
+    14: "dresser",
+    15: "flower_pot",
+    16: "glass_box",
+    17: "guitar",
+    18: "keyboard",
+    19: "lamp",
+    20: "laptop",
+    21: "mantel",
+    22: "monitor",
+    23: "night_stand",
+    24: "person",
+    25: "piano",
+    26: "plant",
+    27: "radio",
+    28: "range_hood",
+    29: "sink",
+    30: "sofa",
+    31: "stairs",
+    32: "stool",
+    33: "table",
+    34: "tent",
+    35: "toilet",
+    36: "tv_stand",
+    37: "vase",
+    38: "wardrobe",
+    39: "xbox",
+    }
+
+
+plotter = None
+def load3dobj(model):
+    global plotter
+    objfile = filedialog.askopenfilename(filetypes=[("3D Object File", ".obj .stl .off")])
+    pointcloud = createpointcloudforfile(objfile)
+    pointcloud = torch.tensor([pointcloud.tolist()])
+    pointcloud = pointcloud.permute(0, 2, 1)
+    logits = model(pointcloud)
+    guess = (logits.max(dim=1)[1]).item()
+    guess_str = classdict[guess]
+
+    loadVoxMLFile("classificator/classfiles/" + guess_str + ".txt")
+    framer.object_window.debug_textfield.insert(constants.INSERT, "\nObject classified as: " + guess_str + ".")
+    if plotter is not None:
+        plotter.close()
+    mesh = pv.read(objfile)
+    plotter = BackgroundPlotter()
+    plotter.add_mesh(mesh)
+
+
+
+
+

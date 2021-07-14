@@ -5,13 +5,28 @@ import framer
 from tkinter import *
 import changelog_window
 import help_window
+import torch
+from classificator.model import DGCNN
+import torch.nn as nn
 
 
 def quitapplication():
     framer.Window.destroy()
 
 
+def initmodel():
+    device = torch.device("cpu")
+    model = DGCNN().to(device)
+    model = nn.DataParallel(model)
+    model.load_state_dict(torch.load("classificator/pretrained/custommodelorig.t7", map_location=torch.device('cpu')))
+    model = model.eval()
+    return model
+
+
 def createwindow():
+
+    model = initmodel()
+
     """
     Create MainWindow of the VoxML Annotator
     """
@@ -32,15 +47,15 @@ def createwindow():
                             compound=CENTER, foreground="white", activeforeground="#a3ff8f", font=(None, 14))
     loadvoxml_button.place(x=1150, y=118)
 
-    loadhtml_button = Button(framer.Topframe, text="Open HTML", command=lambda: inspector.createwindow())
+    loadhtml_button = Button(framer.Topframe, text="Open HTML", command=lambda: inspector.createhtmlwindow())
     loadhtml_button.config(image=framer.largebtnpic, borderwidth=0, bg="#a3ff8f", activebackground="#a3ff8f",
                            compound=CENTER, foreground="white", activeforeground="#a3ff8f", font=(None, 14))
     loadhtml_button.place(x=1282, y=118)
 
-    # loadobj_button = Button(framer.Topframe, text="Open 3D Obj", command=lambda: componentloader.load3dobj())
-    # loadobj_button.config(image=framer.largebtnpic, borderwidth=0, bg="#a3ff8f", activebackground="#a3ff8f",
-    #                          compound=CENTER, foreground="white", activeforeground="#a3ff8f", font=(None, 14))
-    # loadobj_button.place(x=1414, y=118)
+    loadobj_button = Button(framer.Topframe, text="Open 3D Obj", command=lambda: componentloader.load3dobj(model))
+    loadobj_button.config(image=framer.largebtnpic, borderwidth=0, bg="#a3ff8f", activebackground="#a3ff8f",
+                             compound=CENTER, foreground="white", activeforeground="#a3ff8f", font=(None, 14))
+    loadobj_button.place(x=1414, y=118)
 
     openhelp_button = Button(framer.Topframe, text="Help", command=lambda: help_window.createwindow())
     openhelp_button.config(image=framer.btnpic, borderwidth=0, bg="#a3ff8f", activebackground="#a3ff8f",
