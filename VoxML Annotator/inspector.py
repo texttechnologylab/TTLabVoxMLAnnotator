@@ -10,11 +10,12 @@ def createhtmlwindow():
      Opening PartNet .html for opening objectstructures
     """
     partdir = filedialog.askdirectory()
-    print(partdir)
     if partdir is None:
         return
     dest = os.getcwd() + '/parts_render'
-    print(dest)
+
+    if not os.path.isdir(partdir + '/parts_render'):
+        return
 
     shutil.copytree(partdir + '/parts_render', dest)
 
